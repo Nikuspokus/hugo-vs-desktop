@@ -1,0 +1,53 @@
+{
+  "name": "stickman-vs-desktop",
+  "productName": "Hugo vs Desktop",
+  "version": "3.0.0",
+  "description": "Jeu d'action et de plateformes : Hugo contre le Bureau",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:app": "electron-builder --mac --dir",
+    "build:exe": "electron-builder --win portable --x64"
+  },
+  "build": {
+    "appId": "com.stickman.vs.desktop",
+    "productName": "Hugo vs Desktop",
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.action-games",
+      "identity": null
+    },
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "stickman.exe"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "styles.css",
+      "src/**/*",
+      "package.json",
+      "build/icon.png"
+    ],
+    "icon": "build/icon.png",
+    "directories": {
+      "buildResources": "build"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "author": "Papa de Hugo"
+}

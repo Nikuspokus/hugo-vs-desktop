@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+  <title>Hugo vs Desktop</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- HUD EN JEU -->
+  <div id="hud" class="hidden">
+    <div class="hud-left panel">
+      <canvas id="hud-avatar" width="60" height="60"></canvas>
+      <div class="hud-row">
+        <span class="level-badge" id="hud-level-name">1-1 : Le Bureau</span>
+        <span class="bits-badge">🪙 <span id="hud-bits">0</span> Bits</span>
+        <span id="combo-badge" class="combo-badge"></span>
+        <span id="hud-info" class="hud-info"></span>
+      </div>
+      <div class="hp-bar"><div id="hp-fill"></div></div>
+      <div class="energy-bar"><div id="energy-fill"></div></div>
+      <div class="hud-row" style="margin-top:6px;"><span id="streak-badge" class="streak-badge"></span><span id="nova-hint" class="nova-hint"></span></div>
+      <div class="hud-row" style="margin-top:8px;">
+        <span id="weapon-name" class="weapon-tag">👊 Poings</span>
+        <div id="powerups-bar" class="powerups-bar"></div>
+      </div>
+    </div>
+
+    <div id="boss-hud" class="boss-hud hidden">
+      <div id="boss-title">⚠️ BOSS SYSTÈME</div>
+      <div class="boss-bar"><div id="boss-fill"></div></div>
+    </div>
+
+    <div class="hud-right panel">
+      <div id="gp-status" class="gp-status">🎮 Manette : Appuie sur A</div>
+      <div class="controls-mini">
+        <strong>Manette :</strong> Stick : Bouger • <strong>A</strong> : Saut x2 • <strong>X/RT</strong> : Coup • <strong>B/RB</strong> : Dash • <strong>Y</strong> : Arme • <strong>LB</strong> : Nova • <strong>LT/Select</strong> : Parade • <strong>Start</strong> : Pause<br>
+        <strong>Clavier :</strong> Q/D : Bouger • Espace : Saut x2 • F/Clic : Coup • Shift : Dash • E : Arme • <strong>C</strong> : Parade • <strong>R</strong> : Nova • <strong>G</strong> : Emote • <strong>Échap</strong> : Pause
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉCRAN TITRE -->
+  <div id="screen-title" class="overlay title-screen">
+    <div class="title-layout">
+      <div class="title-left">
+        <div class="logo">
+          <div class="logo-tag"><span class="dot"></span> STUDIO EDITION • MAC &amp; WINDOWS</div>
+          <h1 class="game-title">HUGO<br><span class="accent">VS</span> DESKTOP</h1>
+        </div>
+
+        <div class="menu-list">
+          <button id="btn-play" class="menu-btn primary">
+            <span class="ico c-cyan"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span>
+            <span class="lbl"><b>JOUER</b><small id="play-sub">Continuer l'aventure</small></span><span class="chev">›</span>
+          </button>
+          <button id="btn-levels" class="menu-btn">
+            <span class="ico c-green"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>
+            <span class="lbl"><b>DONJONS</b><small>Choisir un niveau</small></span><span class="chev">›</span>
+          </button>
+          <button id="btn-endless" class="menu-btn">
+            <span class="ico c-orange"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M18.2 7.8c-3.4 0-5.2 8.4-8.4 8.4a4.2 4.2 0 1 1 0-8.4c3.2 0 5 8.4 8.4 8.4a4.2 4.2 0 1 0 0-8.4z"/></svg></span>
+            <span class="lbl"><b>MODE INFINI</b><small id="endless-sub">Vagues sans fin</small></span><span class="chev">›</span>
+          </button>
+          <button id="btn-wardrobe" class="menu-btn">
+            <span class="ico c-pink"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M8 3L3 6l2 4 3-1v11h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/></svg></span>
+            <span class="lbl"><b>VESTIAIRE</b><small>Couleurs, capes, auras</small></span><span class="chev">›</span>
+          </button>
+          <button id="btn-progress" class="menu-btn">
+            <span class="ico c-gold"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8M10 18h4"/></svg></span>
+            <span class="lbl"><b>PROGRESSION</b><small id="progress-sub">Talents &amp; succès</small></span><span class="chev">›</span>
+          </button>
+          <div class="menu-row">
+            <button id="btn-options" class="menu-btn mini">
+              <span class="ico c-slate"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></span><span class="lbl"><b>OPTIONS</b></span>
+            </button>
+            <button id="btn-quit" class="menu-btn mini danger">
+              <span class="ico c-red"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3v9M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></span><span class="lbl"><b>QUITTER</b></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="keys-hint">
+          <span><kbd>Q</kbd><kbd>D</kbd> Bouger</span><span><kbd>Espace</kbd> Saut</span><span><kbd>F</kbd> Coup</span>
+          <span><kbd>Shift</kbd> Dash</span><span><kbd>C</kbd> Parade</span><span><kbd>R</kbd> Nova</span>
+        </div>
+        <div class="hint-bar" id="title-gp-hint">Compatible Clavier/Souris &amp; Manette (Xbox, SNES USB…)</div>
+      </div>
+
+      <div class="title-right">
+        <div class="profile-card">
+          <div class="profile-top">
+            <div class="avatar-wrap">
+              <canvas id="profile-avatar" width="150" height="190"></canvas>
+              <div class="lvl-badge" id="profile-lvl">1</div>
+            </div>
+            <div class="profile-id">
+              <div class="profile-name">HUGO</div>
+              <div class="profile-rank" id="profile-rank">Recrue</div>
+              <div class="xp-bar"><div id="profile-xp"></div></div>
+              <div class="xp-label" id="profile-xp-label">0 / 40 XP</div>
+              <div class="currency-pill">🪙 <strong id="menu-bits">0</strong> Bits</div>
+            </div>
+          </div>
+          <div class="stat-grid" id="profile-stats"></div>
+          <div class="equip-row" id="profile-equip"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SÉLECTION DES NIVEAUX -->
+  <div id="screen-levels" class="overlay hidden">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h2>🗺️ SÉLECTION DU DONJON</h2>
+        <button class="btn-close" data-back="screen-title">← Retour</button>
+      </div>
+      <div id="levels-grid" class="levels-grid"></div>
+    </div>
+  </div>
+
+  <!-- VESTIAIRE (PERSONNALISATION) -->
+  <div id="screen-wardrobe" class="overlay hidden">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h2>🧥 VESTIAIRE DE HUGO</h2>
+        <div class="currency-pill">🪙 <strong id="wardrobe-bits">0</strong> Bits</div>
+        <button class="btn-close" data-back="screen-title">← Retour</button>
+      </div>
+
+      <div class="wardrobe-layout">
+        <div class="wardrobe-preview">
+          <canvas id="preview-canvas" width="260" height="320"></canvas>
+          <div class="preview-label" id="preview-label">Aperçu en direct</div>
+        </div>
+
+        <div class="wardrobe-catalog">
+          <div class="tabs">
+            <button class="tab active" data-cat="colors">🎨 Couleurs</button>
+            <button class="tab" data-cat="hats">🎩 Chapeaux</button>
+            <button class="tab" data-cat="capes">🦸 Capes</button>
+            <button class="tab" data-cat="weapons">⚔️ Armes</button>
+            <button class="tab" data-cat="heads">🗿 Têtes</button>
+            <button class="tab" data-cat="emotes">💃 Emotes</button>
+            <button class="tab" data-cat="auras">🔥 Auras</button>
+          </div>
+          <div id="outfits" class="outfit-row"></div>
+          <div id="wardrobe-items" class="items-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTIONS -->
+  <div id="screen-options" class="overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>⚙️ OPTIONS</h2>
+        <button class="btn-close" data-back="screen-title">← Retour</button>
+      </div>
+      <div class="options-list">
+        <label class="option-item">
+          <span>🔊 Bruitages & Effets sonores</span>
+          <input type="checkbox" id="opt-sfx" checked>
+        </label>
+        <label class="option-item">
+          <span>🎵 Musique Synthwave procédurale</span>
+          <input type="checkbox" id="opt-music" checked>
+        </label>
+        <label class="option-item">
+          <span>📳 Vibrations Manette Xbox</span>
+          <input type="checkbox" id="opt-rumble" checked>
+        </label>
+        <label class="option-item">
+          <span>💥 Tremblements d'écran</span>
+          <input type="checkbox" id="opt-shake" checked>
+        </label>
+        <label class="option-item">
+          <span>👻 Fantôme de ton meilleur temps</span>
+          <input type="checkbox" id="opt-ghost" checked>
+        </label>
+        <label class="option-item">
+          <span>🔊 Volume effets</span>
+          <input type="range" id="opt-vol-sfx" min="0" max="100" step="5" value="100">
+        </label>
+        <label class="option-item">
+          <span>🎵 Volume musique</span>
+          <input type="range" id="opt-vol-music" min="0" max="100" step="5" value="100">
+        </label>
+        <div class="option-item">
+          <span>🎚️ Difficulté</span>
+          <select id="opt-difficulty">
+            <option value="easy">Facile (ennemis -25 %, dégâts -30 %)</option>
+            <option value="normal">Normal</option>
+            <option value="hard">Difficile (ennemis +35 %, dégâts +30 %, Bits +25 %)</option>
+          </select>
+        </div>
+        <div class="option-item">
+          <span>🗑️ Effacer la sauvegarde</span>
+          <button id="opt-reset" class="btn-danger small">Réinitialiser</button>
+        </div>
+        <div class="option-item">
+          <span>🖥️ Affichage Plein Écran</span>
+          <button id="opt-fullscreen" class="btn-secondary small">Basculer (F11 / Ctrl+Cmd+F)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESSION -->
+  <div id="screen-progress" class="overlay hidden">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h2>🏆 PROGRESSION</h2>
+        <div class="currency-pill">🪙 <strong id="progress-bits">0</strong> Bits</div>
+        <button class="btn-close" data-back="screen-title">✖ Fermer</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-ptab="talents">🌳 Talents</button>
+        <button class="tab" data-ptab="achievements">🏆 Succès</button>
+        <button class="tab" data-ptab="records">📊 Défis & Records</button>
+      </div>
+      <div id="progress-content" class="items-grid"></div>
+    </div>
+  </div>
+
+  <!-- MENU PAUSE -->
+  <div id="screen-pause" class="overlay hidden">
+    <div class="modal-card">
+      <h2>⏸️ JEU EN PAUSE</h2>
+      <div class="menu-buttons" style="margin-top:20px;">
+        <button id="btn-resume" class="btn-primary">▶ REPRENDRE</button>
+        <button id="btn-restart-level" class="btn-secondary">↻ RECOMMENCER LE NIVEAU</button>
+        <button id="btn-pause-wardrobe" class="btn-secondary">🧥 VESTIAIRE</button>
+        <button id="btn-to-menu" class="btn-danger">🏠 MENU PRINCIPAL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VICTOIRE NIVEAU -->
+  <div id="screen-victory" class="overlay hidden">
+    <div class="modal-card">
+      <div class="subtitle" style="color:#4ade80;">DONJON TERMINÉ !</div>
+      <h2 id="vic-title" style="font-size:32px; margin:8px 0;">Niveau Complété</h2>
+      <div class="stats-box">
+        <div>⏱️ Temps : <strong id="vic-time">00:00</strong></div>
+        <div>⚔️ Ennemis vaincus : <strong id="vic-kills">0</strong></div>
+        <div>🪙 Bits récoltés : <strong id="vic-bits" style="color:#facc15;">+0</strong></div>
+        <div>🏆 Rang : <strong id="vic-rank" style="color:#38bdf8; font-size:22px;">S</strong></div>
+      </div>
+      <div id="vic-best" class="vic-best"></div>
+      <div id="vic-challenges" class="challenges-box"></div>
+      <div class="menu-buttons">
+        <button id="btn-next-level" class="btn-primary">▶ NIVEAU SUIVANT</button>
+        <button id="btn-vic-wardrobe" class="btn-secondary">🧥 ALLER AU VESTIAIRE</button>
+        <button id="btn-vic-menu" class="btn-secondary">🏠 MENU PRINCIPAL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="screen-gameover" class="overlay hidden">
+    <div class="modal-card">
+      <h2 style="color:#f43f5e; font-size:38px;">SYSTÈME PLANTÉ</h2>
+      <p id="go-extra" style="margin:14px 0 24px; color:#cbd5e1;">Hugo a été effacé de la mémoire vive. Réessaie !</p>
+      <div class="menu-buttons">
+        <button id="btn-go-retry" class="btn-primary">↻ RÉESSAYER (A / Entrée)</button>
+        <button id="btn-go-menu" class="btn-secondary">🏠 MENU PRINCIPAL</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/storage.js"></script>
+  <script src="src/audio.js"></script>
+  <script src="src/wardrobe.js"></script>
+  <script src="src/levels.js"></script>
+  <script src="src/scenery.js"></script>
+  <script src="src/extras.js"></script>
+  <script src="src/stickman.js"></script>
+  <script src="src/game.js"></script>
+  <script src="src/ui.js"></script>
+</body>
+</html>
